@@ -1,26 +1,34 @@
 import React from 'react';
+import TextField from 'material-ui/TextField';
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import RaisedButton from 'material-ui/RaisedButton';
+import injectTapEventPlugin from 'react-tap-event-plugin';
+
+injectTapEventPlugin();
 
 class List extends React.Component {
   constructor() {
     super()
     this.state = {
-      items: []
+      items: [],
+      currentValue: ""
     }
   }
 
   addItem(e) {
     e.preventDefault();
-    const newItem = this.newItem.value
-    if (newItem !== '') {
+    const {items, currentValue} = this.state
+    if (currentValue !== '') {
       this.setState({
-        items: [...this.state.items, newItem]
+        items: [...items, currentValue],
+        currentValue: ""
       })
     }
-    this.addForm.reset()
   }
 
   removeItem(item) {
-    const newItems = this.state.items.filter((buyItem) => {
+    const {items, currentValue} = this.state
+    const newItems = items.filter((buyItem) => {
       return buyItem !== item
     })
     this.setState({
@@ -34,24 +42,32 @@ class List extends React.Component {
     })
   }
 
+  handleChange(e, newValue) {
+    this.setState({
+      currentValue: newValue
+    })
+  }
+
   render() {
     return (
-      <div className="todoList">
-        <form ref={input => this.addForm = input} onSubmit={(e) => {this.addItem(e)}}>
-          <input ref={input => this.newItem = input} type="text" placeholder="What to do?" />
-          <button type="submit">Add</button>
-          <button type="button" onClick={(e) => this.removeAll()}>remove All</button>
-        </form>
-        {
-          this.state.items.map(item => {
-            return (
-              <div key={item}>
-                <TodoItem key={item} item={item} status="active" handler={this.removeItem.bind(this)}/>
-              </div>
-            )
-          })
-        }
-      </div>
+      <MuiThemeProvider >
+        <div className="todoList">
+          <form onSubmit={(e) => {this.addItem(e)}}>
+            <TextField hintText="What to do?" onChange={this.handleChange.bind(this)} value={this.state.currentValue}/>
+            <RaisedButton type="submit" label="Add" />
+            <RaisedButton type="button" onClick={(e) => this.removeAll()} label="Remove All" />
+          </form>
+          {
+            this.state.items.map(item => {
+              return (
+                <div key={item}>
+                  <TodoItem key={item} item={item} status="active" handler={this.removeItem.bind(this)}/>
+                </div>
+              )
+            })
+          }
+        </div>
+      </MuiThemeProvider>
     )
   }
 }
@@ -61,9 +77,11 @@ const TodoItem = (props) => {
     <div className="todoList__item">
       <div className="status">{props.status}</div>
       <div className="content">{props.item}</div>
-      <button type="button" className="remove" onClick={(e) => props.handler(props.item)}>remove</button>
+      <RaisedButton type="button" className="remove" onClick={(e) => props.handler(props.item)} label="remove" />
     </div>
   )
 }
+
+
 
 export default List
